@@ -165,48 +165,48 @@ export default function App() {
           />
         )}
         <div hidden={selectedPokemon !== null}>
-          <div className="welcome">
-            <p className="eyebrow"><span aria-hidden="true">✦</span> Welcome, trainer</p>
-            <h1>Meet a new friend. <br />Make them feel at home.</h1>
-            <p className="welcome-description">
-              Draw a Pokémon, choose whether to adopt, and care for your growing lobby.
-            </p>
-            <a className="lobby-link" href="#pokemon-lobby">Visit the lobby <span aria-hidden="true">↗</span></a>
-            <div className="welcome-art" aria-hidden="true">
-              <span className="orbit orbit-one" />
-              <span className="orbit orbit-two" />
-              <span className="hero-spark spark-one">✦</span>
-              <span className="hero-spark spark-two">✧</span>
-              <span className="pokeball hero-ball" />
-              <span className="art-caption">Your next friend is waiting</span>
+          <div className="welcome compact-welcome">
+            <div>
+              <p className="eyebrow"><span aria-hidden="true">✦</span> Welcome back, trainer</p>
+              <h1>Your friends are waiting.</h1>
+              <p className="welcome-description">A gentle place to meet, adopt, and care for Pokémon one day at a time.</p>
             </div>
+            <a className="lobby-link" href="#pokemon-lobby">Enter the lobby <span aria-hidden="true">↓</span></a>
           </div>
 
-          <section id="pokemon-lobby" className="lobby" aria-labelledby="lobby-title">
+          <section id="pokemon-lobby" className="lobby" aria-label="Pokémon Lobby">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">Make yourself at home</p>
-                <h2 id="lobby-title">Pokémon Lobby</h2>
+                <p className="eyebrow">The care room</p>
+                <h2 id="lobby-title">Your Pokémon lobby</h2>
               </div>
-              <span className="preview-label">{pokemon.length} / {MAX_LOBBY_SIZE} Pokémon</span>
+              <span className="preview-label"><span className="sr-only">{pokemon.length} / {MAX_LOBBY_SIZE} Pokémon</span><strong>{pokemon.length}</strong> / {MAX_LOBBY_SIZE} staying here</span>
             </div>
-            <p className="lobby-description">Draw a Pokémon and decide who will join your lobby.</p>
+            <p className="lobby-description">Check in with each friend, then give them what they need to feel their best.</p>
 
-            <div className="draw-panel">
+            <div className="lobby-tools">
+              <div className="meet-station">
+                <span className="station-ball pokeball" aria-hidden="true" />
+                <div>
+                  <p className="station-kicker">Adoption station</p>
+                  <h3>Meet a new friend</h3>
+                  <p>There is always room for a little wonder.</p>
+                </div>
+                <button
+                  ref={drawButtonRef}
+                  className="lobby-button draw-button"
+                  type="button"
+                  aria-label="Draw Pokémon"
+                  disabled={lobbyFull || noDrawablePokemon || drawStatus === 'loading' || Boolean(drawnPokemon)}
+                  onClick={drawPokemon}
+                >
+                  <span className="sr-only">{drawStatus === 'loading' ? 'Drawing Pokémon…' : 'Draw Pokémon'}</span>
+                  <span aria-hidden="true">{drawStatus === 'loading' ? 'Looking around…' : 'See who arrives'}</span>
+                </button>
+              </div>
               <GameSpeedControl value={gameSpeed} onChange={setGameSpeed} />
-              <button
-                ref={drawButtonRef}
-                className="lobby-button draw-button"
-                type="button"
-                disabled={lobbyFull || noDrawablePokemon || drawStatus === 'loading' || Boolean(drawnPokemon)}
-                onClick={drawPokemon}
-              >
-                {drawStatus === 'loading' ? 'Drawing Pokémon…' : 'Draw Pokémon'}
-              </button>
-              {lobbyFull && <p role="status">Your lobby is full. Return a Pokémon to make space.</p>}
-              {!lobbyFull && noDrawablePokemon && (
-                <p role="status">You've met every Pokémon available in this lobby.</p>
-              )}
+              {lobbyFull && <p className="tool-status" role="status">Your lobby is full. Return a Pokémon to make space.</p>}
+              {!lobbyFull && noDrawablePokemon && <p className="tool-status" role="status">You've met every Pokémon available in this lobby.</p>}
             </div>
 
             {drawStatus === 'error' && (
