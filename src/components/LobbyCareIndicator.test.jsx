@@ -1,0 +1,38 @@
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import LobbyCareIndicator from './LobbyCareIndicator';
+
+const pikachu = { id: 25, name: 'pikachu' };
+const psyduck = { id: 54, name: 'psyduck' };
+
+describe('LobbyCareIndicator', () => {
+  it('renders an accessible neutral state for an empty lobby', () => {
+    render(<LobbyCareIndicator pokemon={[]} petStates={{}} />);
+
+    expect(screen.getByRole('status', { name: 'No Pokémon are currently adopted' }))
+      .toHaveTextContent('Lobby empty');
+  });
+
+  it('supports keyboard focus and describes every Pokémon requiring care', () => {
+    render(
+      <LobbyCareIndicator
+        pokemon={[pikachu, psyduck]}
+        petStates={{
+          25: { health: 100, hunger: 0, happiness: 20 },
+          54: { health: 100, hunger: 80, happiness: 30 },
+        }}
+      />,
+    );
+    const indicator = screen.getByRole('status', { name: 'Pikachu has an emergency' });
+
+    indicator.focus();
+
+    expect(indicator).toHaveFocus();
+    expect(indicator).toHaveTextContent('Emergency — 1 Pokémon');
+    const tooltip = screen.getByRole('tooltip');
+    expect(indicator).toHaveAttribute('aria-describedby', tooltip.id);
+    expect(tooltip).toHaveTextContent('Pikachu — Hunger: 0, Happiness: 20 (Emergency)');
+    expect(tooltip).toHaveTextContent('Psyduck — Happiness: 30');
+    expect(tooltip).not.toHaveTextContent('Health: 100');
+  });
+});
