@@ -18,6 +18,8 @@ the Pokémon and metrics that need attention on hover or keyboard focus. One
 lobby-wide timer applies status decay at the player's selected game speed.
 Players can return an adopted Pokémon after confirmation to free capacity.
 Adopted Pokémon and their care values persist across page refreshes.
+If every care value reaches zero, the Pokémon must be permanently returned and
+is excluded from future draws.
 
 ## Run locally
 
@@ -120,8 +122,10 @@ better.
 Values stay within 0–100. Lobby cards show labeled native meters and visible
 numbers for all three values. The lowest value determines the state: 70–100 is
 "Doing Well", 50–69 is "Needs Attention", 20–49 is "Needs Care", and 0–19 is
-"Emergency". Specific text such as "Needs food" or "Needs attention" accompanies
-warning styling, and recovering every metric to 70 removes it.
+"Emergency". Exactly zero for health, hunger, and happiness is "Return Required".
+One or two zero values remain recoverable emergencies. Specific text such as
+"Needs food" or "Needs attention" accompanies warning styling, and recovering
+every metric to 70 removes it.
 The detail panel also retains its focused low-hunger message. Care buttons show
 their effects, support keyboard activation, and retain visible focus.
 
@@ -139,7 +143,8 @@ state without relying on color. Hovering it or focusing it from the keyboard
 opens a concise tooltip containing every Pokémon below Doing Well and only the
 care metrics below 70. The state is derived directly from current pet values.
 Its brief transition runs on state changes and is disabled when reduced motion
-is preferred.
+is preferred. Return Required has priority over Emergency and reuses the
+strongest warning treatment.
 
 Each decay tick decreases hunger and happiness by 10. Health remains stable
 unless that tick leaves hunger below 20; emergency hunger then decreases health
@@ -171,17 +176,30 @@ updates capacity, stops tracking it in status decay, and focuses Draw Pokémon.
 Its ID becomes eligible for a later draw. If adopted again, it receives fresh
 initial care values rather than the previous state.
 
+When all three care values reach zero, the card becomes inactive, its artwork
+becomes grayscale, and its status changes to Return Required. Care controls and
+random events are removed, while the care logic also rejects interaction and
+decay updates for that Pokémon. The card remains visible until the player uses
+its named Return action and confirms the permanent consequence.
+
+A care-failure return removes the Pokémon, frees its lobby slot, and records its
+ID in `returnedPokemonIds`. Permanently returned IDs are removed from the draw
+candidate pool before random selection and cannot be adopted again. Voluntary
+returns continue to work as before and remain eligible for a future draw.
+
 ## Persistence
 
-The app saves only adopted Pokémon and their keyed care state in localStorage.
+The app saves adopted Pokémon, their keyed care state, and permanently returned
+Pokémon IDs in localStorage.
 A fresh mount restores the lobby without another PokéAPI request. Pending draws,
 the open detail screen, random-event messages, and timer positions are temporary.
 
 The storage utility validates the saved shape, removes duplicate entries, limits
 restoration to ten Pokémon, and ignores invalid care values. Missing, malformed,
-unavailable, or full storage falls back safely without preventing play. Restored
-values do not include offline decay; decay resumes from the saved values only
-while the application is running.
+unavailable, or full storage falls back safely without preventing play. Returned
+IDs take precedence over malformed active-lobby entries during restoration.
+Restored values do not include offline decay; decay resumes from the saved values
+only while the application is running.
 
 ## Random events
 
@@ -224,7 +242,9 @@ The lobby starts empty and never fetches automatically. Draw Pokémon selects on
 ID from the supported set and fetches that Pokémon through the existing service.
 The reveal does not change lobby state until Adopt is activated; Skip discards it.
 Already adopted IDs are removed from the next draw's candidate set without retry
-loops. Failed requests show an error and can be retried without adding a card.
+loops. Permanently returned IDs are excluded from the same derived candidate
+pool. If no candidates remain, Draw Pokémon is disabled with a friendly status
+message. Failed requests show an error and can be retried without adding a card.
 
 The lobby contains at most ten Pokémon. The capacity rule is enforced in the
 state helper as well as the disabled Draw control. At capacity, a readable status

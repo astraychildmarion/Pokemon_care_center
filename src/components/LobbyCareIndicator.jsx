@@ -9,7 +9,11 @@ function problemSummary(entry) {
   const problems = entry.problems
     .map(({ label, value }) => `${label}: ${value}`)
     .join(', ');
-  return `${entry.name} — ${problems}${entry.level === 'emergency' ? ' (Emergency)' : ''}`;
+  const stateLabel = {
+    emergency: ' (Emergency)',
+    'return-required': ' (Return Required)',
+  }[entry.level] ?? '';
+  return `${entry.name} — ${problems}${stateLabel}`;
 }
 
 export default function LobbyCareIndicator({ pokemon, petStates }) {
@@ -38,7 +42,7 @@ export default function LobbyCareIndicator({ pokemon, petStates }) {
         {status.level === 'doing-well' && <p>All adopted Pokémon are doing well.</p>}
         {status.pokemonNeedingCare.length > 0 && (
           <>
-            <strong>Needs attention:</strong>
+            <strong>Care required:</strong>
             <ul>
               {status.pokemonNeedingCare.map((entry) => (
                 <li key={entry.id}>{problemSummary(entry)}</li>

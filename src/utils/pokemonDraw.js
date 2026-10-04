@@ -12,9 +12,22 @@ export function addPokemonToLobby(adoptedPokemon, pokemon) {
   return [...adoptedPokemon, pokemon];
 }
 
-export function selectAvailablePokemonId(adoptedPokemon, random = Math.random) {
+export function getDrawablePokemonIds(adoptedPokemon, returnedPokemonIds = []) {
   const adoptedIds = new Set(adoptedPokemon.map(({ id }) => id));
-  const availableIds = AVAILABLE_POKEMON_IDS.filter((id) => !adoptedIds.has(id));
+  const returnedIds = new Set(returnedPokemonIds);
+  return AVAILABLE_POKEMON_IDS.filter((id) => !adoptedIds.has(id) && !returnedIds.has(id));
+}
+
+export function selectAvailablePokemonId(
+  adoptedPokemon,
+  returnedPokemonIds = [],
+  random = Math.random,
+) {
+  if (typeof returnedPokemonIds === 'function') {
+    random = returnedPokemonIds;
+    returnedPokemonIds = [];
+  }
+  const availableIds = getDrawablePokemonIds(adoptedPokemon, returnedPokemonIds);
   if (availableIds.length === 0) return null;
 
   const index = Math.min(Math.floor(random() * availableIds.length), availableIds.length - 1);

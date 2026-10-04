@@ -4,7 +4,12 @@ function clamp(value) {
   return Math.max(0, Math.min(100, value));
 }
 
+export function isReturnRequired(pet) {
+  return pet.health === 0 && pet.hunger === 0 && pet.happiness === 0;
+}
+
 export function updatePetState(pet, action) {
+  if (isReturnRequired(pet)) return pet;
   switch (action) {
     case 'feed':
       return {
@@ -30,6 +35,7 @@ export function updatePetState(pet, action) {
 }
 
 export function getCareLevel(pet) {
+  if (isReturnRequired(pet)) return 'return-required';
   const lowestStatus = Math.min(pet.health, pet.hunger, pet.happiness);
   if (lowestStatus < 20) return 'emergency';
   if (lowestStatus < 50) return 'needs-care';
@@ -38,6 +44,7 @@ export function getCareLevel(pet) {
 }
 
 export function decayPetState(pet) {
+  if (isReturnRequired(pet)) return pet;
   const hunger = clamp(pet.hunger - 10);
   return {
     health: hunger < 20 ? clamp(pet.health - 10) : pet.health,
@@ -47,6 +54,7 @@ export function decayPetState(pet) {
 }
 
 export function applyPetEvent(pet, event) {
+  if (isReturnRequired(pet)) return pet;
   switch (event) {
     case 'hungry':
       return { ...pet, hunger: clamp(pet.hunger - 15) };

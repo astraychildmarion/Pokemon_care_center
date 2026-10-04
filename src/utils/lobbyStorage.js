@@ -1,7 +1,7 @@
 import { MAX_LOBBY_SIZE } from './pokemonDraw';
 
 const STORAGE_KEY = 'pokemon-adoption-lobby';
-const EMPTY_LOBBY = { pokemon: [], petStates: {} };
+const EMPTY_LOBBY = { pokemon: [], petStates: {}, returnedPokemonIds: [] };
 
 function getBrowserStorage(storage) {
   if (storage) return storage;
@@ -35,10 +35,14 @@ export function loadLobbyState(storage) {
       return EMPTY_LOBBY;
     }
 
+    const returnedPokemonIds = Array.isArray(savedState.returnedPokemonIds)
+      ? [...new Set(savedState.returnedPokemonIds.filter((id) => Number.isInteger(id) && id > 0))]
+      : [];
+    const returnedIds = new Set(returnedPokemonIds);
     const seenIds = new Set();
     const pokemon = savedState.pokemon
       .filter((guest) => {
-        if (!isPokemon(guest) || seenIds.has(guest.id)) return false;
+        if (!isPokemon(guest) || seenIds.has(guest.id) || returnedIds.has(guest.id)) return false;
         seenIds.add(guest.id);
         return true;
       })
@@ -48,7 +52,7 @@ export function loadLobbyState(storage) {
       if (isPetState(savedState.petStates[id])) petStates[id] = savedState.petStates[id];
     });
 
-    return { pokemon, petStates };
+    return { pokemon, petStates, returnedPokemonIds };
   } catch {
     return EMPTY_LOBBY;
   }

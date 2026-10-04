@@ -5,6 +5,7 @@ const LEVELS = {
   'needs-attention': { label: 'Needs Attention', priority: 1 },
   'needs-care': { label: 'Needs Care', priority: 2 },
   emergency: { label: 'Emergency', priority: 3 },
+  'return-required': { label: 'Return Required', priority: 4 },
 };
 
 function formatName(name) {
@@ -19,6 +20,9 @@ function accessibleLabel(level, count, pokemonAtWorstLevel) {
   }
   if (level === 'needs-care') {
     return count === 1 ? '1 Pokémon needs care' : `${count} Pokémon need care`;
+  }
+  if (level === 'return-required') {
+    return count === 1 ? '1 Pokémon must be returned' : `${count} Pokémon must be returned`;
   }
   if (count === 1) return `${pokemonAtWorstLevel[0].name} has an emergency`;
   return `${count} Pokémon have an emergency`;

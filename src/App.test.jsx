@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { fetchPokemonDetails } from './services/pokemonApi';
+import { AVAILABLE_POKEMON_IDS } from './utils/pokemonDraw';
 
 vi.mock('./services/pokemonApi', () => ({
   fetchPokemonDetails: vi.fn(),
@@ -277,5 +278,48 @@ describe('Pokémon adoption lobby', () => {
     expect(screen.getByRole('meter', { name: 'bulbasaur hunger' })).toHaveAttribute('value', '100');
     expect(screen.getByRole('meter', { name: 'bulbasaur happiness' })).toHaveAttribute('value', '85');
     expect(fetchPokemonDetails).not.toHaveBeenCalled();
+  });
+
+  it('permanently returns a failed-care Pokémon and excludes it after restoration', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    localStorage.setItem('pokemon-adoption-lobby', JSON.stringify({
+      pokemon: [bulbasaur],
+      petStates: { 1: { health: 0, hunger: 0, happiness: 0 } },
+      returnedPokemonIds: [],
+    }));
+    fetchPokemonDetails.mockResolvedValue(charmander);
+    const firstVisit = render(<App />);
+
+    expect(screen.getByRole('status', { name: '1 Pokémon must be returned' }))
+      .toHaveTextContent('Return Required');
+    expect(screen.getByText('1 / 10 Pokémon')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Return Bulbasaur' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm return Bulbasaur' }));
+
+    expect(screen.getByText('0 / 10 Pokémon')).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem('pokemon-adoption-lobby')).returnedPokemonIds)
+      .toEqual([1]);
+    fireEvent.click(screen.getByRole('button', { name: 'Draw Pokémon' }));
+    expect(fetchPokemonDetails).toHaveBeenLastCalledWith(4);
+
+    firstVisit.unmount();
+    fetchPokemonDetails.mockClear();
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: 'Draw Pokémon' }));
+    expect(fetchPokemonDetails).toHaveBeenLastCalledWith(4);
+  });
+
+  it('disables drawing when every supported Pokémon is permanently unavailable', () => {
+    localStorage.setItem('pokemon-adoption-lobby', JSON.stringify({
+      pokemon: [],
+      petStates: {},
+      returnedPokemonIds: AVAILABLE_POKEMON_IDS,
+    }));
+
+    render(<App />);
+
+    expect(screen.getByRole('button', { name: 'Draw Pokémon' })).toBeDisabled();
+    expect(screen.getByText("You've met every Pokémon available in this lobby."))
+      .toHaveAttribute('role', 'status');
   });
 });

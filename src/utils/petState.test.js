@@ -4,6 +4,7 @@ import {
   decayPetState,
   getCareLevel,
   INITIAL_PET_STATE,
+  isReturnRequired,
   updatePetState,
 } from './petState';
 
@@ -51,8 +52,24 @@ describe('care levels', () => {
     [{ health: 80, hunger: 20, happiness: 100 }, 'needs-care'],
     [{ health: 80, hunger: 19, happiness: 100 }, 'emergency'],
     [{ health: 0, hunger: 80, happiness: 100 }, 'emergency'],
+    [{ health: 0, hunger: 0, happiness: 20 }, 'emergency'],
+    [{ health: 0, hunger: 0, happiness: 0 }, 'return-required'],
   ])('classifies %j as %s', (status, level) => {
     expect(getCareLevel(status)).toBe(level);
+  });
+
+  it('requires return only when every care value is zero', () => {
+    expect(isReturnRequired({ health: 0, hunger: 40, happiness: 70 })).toBe(false);
+    expect(isReturnRequired({ health: 0, hunger: 0, happiness: 20 })).toBe(false);
+    expect(isReturnRequired({ health: 0, hunger: 0, happiness: 0 })).toBe(true);
+  });
+
+  it('does not allow care actions to recover a Pokémon that requires return', () => {
+    const failedCare = { health: 0, hunger: 0, happiness: 0 };
+
+    expect(updatePetState(failedCare, 'feed')).toBe(failedCare);
+    expect(updatePetState(failedCare, 'water')).toBe(failedCare);
+    expect(updatePetState(failedCare, 'play')).toBe(failedCare);
   });
 });
 
@@ -70,6 +87,13 @@ describe('status decay', () => {
   it('never lowers a status below zero', () => {
     expect(decayPetState({ health: 0, hunger: 1, happiness: 0 }))
       .toEqual({ health: 0, hunger: 0, happiness: 0 });
+  });
+
+  it('does not update a Pokémon after return becomes required', () => {
+    const failedCare = { health: 0, hunger: 0, happiness: 0 };
+
+    expect(decayPetState(failedCare)).toBe(failedCare);
+    expect(applyPetEvent(failedCare, 'hungry')).toBe(failedCare);
   });
 });
 

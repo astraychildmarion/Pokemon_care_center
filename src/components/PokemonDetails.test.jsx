@@ -110,4 +110,27 @@ describe('PokemonDetails', () => {
     expect(onRandomEvent).toHaveBeenCalledExactlyOnceWith('hungry');
     expect(screen.getByRole('status')).toHaveTextContent('Bulbasaur is feeling hungry.');
   });
+
+  it('removes care and random events when permanent return is required', () => {
+    const onPermanentReturn = vi.fn();
+    render(
+      <PokemonDetails
+        pokemon={bulbasaur}
+        pet={{ health: 0, hunger: 0, happiness: 0 }}
+        onBack={vi.fn()}
+        onInteract={vi.fn()}
+        onRandomEvent={vi.fn()}
+        onPermanentReturn={onPermanentReturn}
+      />,
+    );
+
+    expect(screen.queryByRole('button', { name: 'Feed' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Give Water' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
+    expect(screen.getByText('Bulbasaur can no longer stay in your lobby.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Return Bulbasaur' }));
+    expect(screen.getByText(/you will not be able to adopt Bulbasaur again/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm return Bulbasaur' }));
+    expect(onPermanentReturn).toHaveBeenCalledExactlyOnceWith(bulbasaur);
+  });
 });

@@ -9,9 +9,15 @@ import {
   applyPetEvent,
   decayPetState,
   INITIAL_PET_STATE,
+  isReturnRequired,
   updatePetState,
 } from './utils/petState';
-import { addPokemonToLobby, MAX_LOBBY_SIZE, selectAvailablePokemonId } from './utils/pokemonDraw';
+import {
+  addPokemonToLobby,
+  getDrawablePokemonIds,
+  MAX_LOBBY_SIZE,
+  selectAvailablePokemonId,
+} from './utils/pokemonDraw';
 import { loadLobbyState, saveLobbyState } from './utils/lobbyStorage';
 import { DEFAULT_GAME_SPEED, GAME_SPEEDS } from './utils/gameSpeed';
 
@@ -23,11 +29,13 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedPokemon, setSelectedPokemon] = useState(null);
   const [petStates, setPetStates] = useState(savedLobby.petStates);
+  const [returnedPokemonIds, setReturnedPokemonIds] = useState(savedLobby.returnedPokemonIds);
   const [gameSpeed, setGameSpeed] = useState(DEFAULT_GAME_SPEED);
   const returnFocusRef = useRef(null);
   const drawButtonRef = useRef(null);
   const drawInProgressRef = useRef(false);
   const lobbyFull = pokemon.length >= MAX_LOBBY_SIZE;
+  const noDrawablePokemon = getDrawablePokemonIds(pokemon, returnedPokemonIds).length === 0;
 
   function selectPokemon(guest) {
     returnFocusRef.current = document.activeElement;
@@ -53,8 +61,8 @@ export default function App() {
   }
 
   async function drawPokemon() {
-    if (lobbyFull || drawnPokemon || drawInProgressRef.current) return;
-    const pokemonId = selectAvailablePokemonId(pokemon);
+    if (lobbyFull || noDrawablePokemon || drawnPokemon || drawInProgressRef.current) return;
+    const pokemonId = selectAvailablePokemonId(pokemon, returnedPokemonIds);
     if (pokemonId === null) return;
 
     drawInProgressRef.current = true;
@@ -94,6 +102,13 @@ export default function App() {
     setSelectedPokemon(null);
   }
 
+  function permanentlyReturnPokemon(returnedPokemon) {
+    setReturnedPokemonIds((ids) => (
+      ids.includes(returnedPokemon.id) ? ids : [...ids, returnedPokemon.id]
+    ));
+    returnPokemon(returnedPokemon);
+  }
+
   useEffect(() => {
     if (!selectedPokemon) returnFocusRef.current?.focus();
   }, [selectedPokemon]);
@@ -104,10 +119,14 @@ export default function App() {
     const timerId = setInterval(() => {
       setPetStates((states) => {
         const decayedStates = { ...states };
+        let changed = false;
         pokemon.forEach(({ id }) => {
-          decayedStates[id] = decayPetState(states[id] ?? INITIAL_PET_STATE);
+          const currentState = states[id] ?? INITIAL_PET_STATE;
+          if (isReturnRequired(currentState)) return;
+          decayedStates[id] = decayPetState(currentState);
+          changed = true;
         });
-        return decayedStates;
+        return changed ? decayedStates : states;
       });
     }, GAME_SPEEDS[gameSpeed].intervalMs);
 
@@ -115,8 +134,8 @@ export default function App() {
   }, [pokemon, gameSpeed]);
 
   useEffect(() => {
-    saveLobbyState({ pokemon, petStates });
-  }, [pokemon, petStates]);
+    saveLobbyState({ pokemon, petStates, returnedPokemonIds });
+  }, [pokemon, petStates, returnedPokemonIds]);
 
   return (
     <>
@@ -143,6 +162,7 @@ export default function App() {
             onInteract={interactWithPokemon}
             onRandomEvent={handleRandomPetEvent}
             onReturn={returnPokemon}
+            onPermanentReturn={permanentlyReturnPokemon}
           />
         )}
         <div hidden={selectedPokemon !== null}>
@@ -179,12 +199,15 @@ export default function App() {
                 ref={drawButtonRef}
                 className="lobby-button draw-button"
                 type="button"
-                disabled={lobbyFull || drawStatus === 'loading' || Boolean(drawnPokemon)}
+                disabled={lobbyFull || noDrawablePokemon || drawStatus === 'loading' || Boolean(drawnPokemon)}
                 onClick={drawPokemon}
               >
                 {drawStatus === 'loading' ? 'Drawing Pokémon…' : 'Draw Pokémon'}
               </button>
               {lobbyFull && <p role="status">Your lobby is full. Return a Pokémon to make space.</p>}
+              {!lobbyFull && noDrawablePokemon && (
+                <p role="status">You've met every Pokémon available in this lobby.</p>
+              )}
             </div>
 
             {drawStatus === 'error' && (
@@ -210,6 +233,7 @@ export default function App() {
                     pokemon={guest}
                     pet={petStates[guest.id] ?? INITIAL_PET_STATE}
                     onSelect={selectPokemon}
+                    onPermanentReturn={permanentlyReturnPokemon}
                   />
                 ))}
               </ul>

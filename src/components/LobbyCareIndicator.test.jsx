@@ -35,4 +35,23 @@ describe('LobbyCareIndicator', () => {
     expect(tooltip).toHaveTextContent('Psyduck — Happiness: 30');
     expect(tooltip).not.toHaveTextContent('Health: 100');
   });
+
+  it('announces Return Required while retaining other emergency details', () => {
+    render(
+      <LobbyCareIndicator
+        pokemon={[pikachu, psyduck]}
+        petStates={{
+          25: { health: 0, hunger: 0, happiness: 0 },
+          54: { health: 0, hunger: 40, happiness: 70 },
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('status', { name: '1 Pokémon must be returned' }))
+      .toHaveTextContent('Return Required — 1 Pokémon');
+    expect(screen.getByRole('tooltip')).toHaveTextContent(
+      'Pikachu — Health: 0, Hunger: 0, Happiness: 0 (Return Required)',
+    );
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Psyduck — Health: 0, Hunger: 40');
+  });
 });

@@ -85,4 +85,23 @@ describe('deriveLobbyCare', () => {
       { label: 'Happiness', value: 20 },
     ]);
   });
+
+  it('gives Return Required priority over Emergency and lists both Pokémon', () => {
+    const result = deriveLobbyCare(
+      [pokemon(25, 'pikachu'), pokemon(54, 'psyduck')],
+      {
+        25: { health: 0, hunger: 0, happiness: 0 },
+        54: { health: 0, hunger: 40, happiness: 70 },
+      },
+    );
+
+    expect(result).toMatchObject({
+      level: 'return-required',
+      label: 'Return Required',
+      accessibleLabel: '1 Pokémon must be returned',
+      countAtWorstLevel: 1,
+    });
+    expect(result.pokemonNeedingCare.map(({ level }) => level))
+      .toEqual(['return-required', 'emergency']);
+  });
 });

@@ -112,4 +112,32 @@ describe('PokemonCard', () => {
     expect(screen.getByText('Needs Attention')).toBeInTheDocument();
     expect(screen.getByText('Needs food')).toBeInTheDocument();
   });
+
+  it('shows an inactive Return Required card and confirms permanent return', () => {
+    const onPermanentReturn = vi.fn();
+    render(
+      <ul>
+        <PokemonCard
+          pokemon={bulbasaur}
+          pet={{ health: 0, hunger: 0, happiness: 0 }}
+          onSelect={vi.fn()}
+          onPermanentReturn={onPermanentReturn}
+        />
+      </ul>,
+    );
+
+    expect(screen.getByText('Return Required')).toBeInTheDocument();
+    expect(screen.getByText('Bulbasaur can no longer stay in the lobby.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Select bulbasaur' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Return Bulbasaur' }));
+    expect(screen.getByRole('heading', { name: 'Return Bulbasaur?' })).toBeInTheDocument();
+    expect(screen.getByText(/Once returned, you will not be able to adopt Bulbasaur again/))
+      .toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(onPermanentReturn).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Return Bulbasaur' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm return Bulbasaur' }));
+
+    expect(onPermanentReturn).toHaveBeenCalledExactlyOnceWith(bulbasaur);
+  });
 });

@@ -20,6 +20,7 @@ describe('lobby storage', () => {
     const state = {
       pokemon: [bulbasaur],
       petStates: { 1: { health: 95, hunger: 72, happiness: 81 } },
+      returnedPokemonIds: [4, 25],
     };
 
     saveLobbyState(state);
@@ -32,7 +33,21 @@ describe('lobby storage', () => {
     (savedValue) => {
       if (savedValue !== null) localStorage.setItem('pokemon-adoption-lobby', savedValue);
 
-      expect(loadLobbyState()).toEqual({ pokemon: [], petStates: {} });
+      expect(loadLobbyState()).toEqual({ pokemon: [], petStates: {}, returnedPokemonIds: [] });
     },
   );
+
+  it('restores unique returned IDs and keeps them out of the active lobby', () => {
+    localStorage.setItem('pokemon-adoption-lobby', JSON.stringify({
+      pokemon: [bulbasaur],
+      petStates: { 1: { health: 0, hunger: 0, happiness: 0 } },
+      returnedPokemonIds: [1, 1, 25, 'invalid'],
+    }));
+
+    expect(loadLobbyState()).toEqual({
+      pokemon: [],
+      petStates: {},
+      returnedPokemonIds: [1, 25],
+    });
+  });
 });

@@ -6,13 +6,23 @@ const CARE_LEVEL_LABELS = {
   'needs-attention': 'Needs Attention',
   'needs-care': 'Needs Care',
   emergency: 'Emergency',
+  'return-required': 'Return Required',
 };
 
-export default function PokemonCard({ pokemon, pet, onSelect, isSelected = false }) {
+export default function PokemonCard({
+  pokemon,
+  pet,
+  onSelect,
+  onPermanentReturn,
+  isSelected = false,
+}) {
   const [failedImageUrl, setFailedImageUrl] = useState(null);
+  const [confirmingReturn, setConfirmingReturn] = useState(false);
   const displayName = pokemon.name.replaceAll('-', ' ');
+  const formattedName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
   const hasArtwork = pokemon.image && pokemon.image !== failedImageUrl;
   const careLevel = pet ? getCareLevel(pet) : null;
+  const returnRequired = careLevel === 'return-required';
   const careNeeds = pet ? [
     pet.health < 70 && 'Needs rest',
     pet.hunger < 70 && 'Needs food',
@@ -64,20 +74,53 @@ export default function PokemonCard({ pokemon, pet, onSelect, isSelected = false
                 </div>
               ))}
             </div>
-            {careNeeds.length > 0 && <p className="card-care-needs">{careNeeds.join(' · ')}</p>}
+            {returnRequired ? (
+              <p className="card-return-message">{formattedName} can no longer stay in the lobby.</p>
+            ) : careNeeds.length > 0 && (
+              <p className="card-care-needs">{careNeeds.join(' · ')}</p>
+            )}
           </div>
         )}
-        <button
-          className="card-select-button"
-          type="button"
-          onClick={(event) => {
-            event.currentTarget.focus();
-            onSelect(pokemon);
-          }}
-        >
-          <span>Select <span className="pokemon-name">{displayName}</span></span>
-          <span aria-hidden="true">↗</span>
-        </button>
+        {returnRequired ? (
+          <div className="card-return">
+            {!confirmingReturn ? (
+              <button className="return-button" type="button" onClick={() => setConfirmingReturn(true)}>
+                Return {formattedName}
+              </button>
+            ) : (
+              <div className="card-return-confirmation">
+                <h4>Return {formattedName}?</h4>
+                <p>
+                  {formattedName} can no longer stay in your lobby. Once returned, you will not be
+                  able to adopt {formattedName} again.
+                </p>
+                <div className="return-actions">
+                  <button className="secondary-button" type="button" onClick={() => setConfirmingReturn(false)}>
+                    Cancel
+                  </button>
+                  <button
+                    aria-label={`Confirm return ${formattedName}`}
+                    className="confirm-return-button"
+                    type="button"
+                    onClick={() => onPermanentReturn?.(pokemon)}
+                  >Return {formattedName}</button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            className="card-select-button"
+            type="button"
+            onClick={(event) => {
+              event.currentTarget.focus();
+              onSelect(pokemon);
+            }}
+          >
+            <span>Select <span className="pokemon-name">{displayName}</span></span>
+            <span aria-hidden="true">↗</span>
+          </button>
+        )}
       </div>
     </li>
   );

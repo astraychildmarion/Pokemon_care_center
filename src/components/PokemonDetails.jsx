@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import PetCare from './PetCare';
 import PokemonCry from './PokemonCry';
 import RandomPetEvent from './RandomPetEvent';
+import { isReturnRequired } from '../utils/petState';
 
 export default function PokemonDetails({
   pokemon,
@@ -10,6 +11,7 @@ export default function PokemonDetails({
   onInteract,
   onRandomEvent,
   onReturn,
+  onPermanentReturn,
 }) {
   const headingRef = useRef(null);
   const returnButtonRef = useRef(null);
@@ -19,6 +21,7 @@ export default function PokemonDetails({
   const displayName = pokemon.name.replaceAll('-', ' ');
   const formattedName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
   const hasArtwork = pokemon.image && pokemon.image !== failedImageUrl;
+  const returnRequired = pet ? isReturnRequired(pet) : false;
 
   useEffect(() => {
     headingRef.current.focus();
@@ -67,10 +70,10 @@ export default function PokemonDetails({
           </ul>
         </div>
       </div>
-      {onRandomEvent && (
+      {onRandomEvent && !returnRequired && (
         <RandomPetEvent pokemonName={pokemon.name} onEvent={onRandomEvent} />
       )}
-      {pet && <PetCare pet={pet} onInteract={onInteract} />}
+      {pet && !returnRequired && <PetCare pet={pet} onInteract={onInteract} />}
       <div className="details-stats">
         <h2 id="stats-title">Base stats</h2>
         <p className="stats-description">A quick look at this Pokémon’s strengths.</p>
@@ -83,7 +86,47 @@ export default function PokemonDetails({
           ))}
         </ul>
       </div>
-      {onReturn && (
+      {returnRequired && onPermanentReturn ? (
+        <section className="return-pokemon return-required" aria-labelledby="return-section-title">
+          {!confirmingReturn ? (
+            <>
+              <h2 id="return-section-title">Return Required</h2>
+              <p>{formattedName} can no longer stay in your lobby.</p>
+              <button
+                ref={returnButtonRef}
+                className="return-button"
+                type="button"
+                onClick={() => setConfirmingReturn(true)}
+              >Return {formattedName}</button>
+            </>
+          ) : (
+            <div className="return-confirmation">
+              <h2 id="return-section-title">Return {formattedName}?</h2>
+              <p>
+                {formattedName} can no longer stay in your lobby. Once returned, you will not be
+                able to adopt {formattedName} again.
+              </p>
+              <div className="return-actions">
+                <button
+                  className="secondary-button"
+                  type="button"
+                  autoFocus
+                  onClick={() => {
+                    restoreReturnFocusRef.current = true;
+                    setConfirmingReturn(false);
+                  }}
+                >Cancel</button>
+                <button
+                  aria-label={`Confirm return ${formattedName}`}
+                  className="confirm-return-button"
+                  type="button"
+                  onClick={() => onPermanentReturn(pokemon)}
+                >Return {formattedName}</button>
+              </div>
+            </div>
+          )}
+        </section>
+      ) : onReturn && (
         <section className="return-pokemon" aria-labelledby="return-section-title">
           {!confirmingReturn ? (
             <>
