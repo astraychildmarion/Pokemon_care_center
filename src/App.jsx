@@ -165,22 +165,18 @@ export default function App() {
           />
         )}
         <div hidden={selectedPokemon !== null}>
-          <div className="welcome">
-            <p className="eyebrow"><span aria-hidden="true">✦</span> Welcome, trainer</p>
-            <h1>Meet a new friend. <br />Make them feel at home.</h1>
-            <p className="welcome-description">
-              Draw a Pokémon, choose whether to adopt, and care for your growing lobby.
-            </p>
-            <a className="lobby-link" href="#pokemon-lobby">Visit the lobby <span aria-hidden="true">↗</span></a>
-            <div className="welcome-art" aria-hidden="true">
-              <span className="orbit orbit-one" />
-              <span className="orbit orbit-two" />
-              <span className="hero-spark spark-one">✦</span>
-              <span className="hero-spark spark-two">✧</span>
-              <span className="pokeball hero-ball" />
-              <span className="art-caption">Your next friend is waiting</span>
+          <section className="welcome" aria-labelledby="welcome-title">
+            <div className="welcome-content">
+              <p className="eyebrow">Welcome, trainer</p>
+              <h1 id="welcome-title">Your Pokémon are waiting for you.</h1>
+              <p className="welcome-description">
+                Meet new friends, care for them, and make them feel at home.
+              </p>
+              <a className="lobby-link" href="#pokemon-lobby">
+                Check on your Pokémon <span aria-hidden="true">↓</span>
+              </a>
             </div>
-          </div>
+          </section>
 
           <section id="pokemon-lobby" className="lobby" aria-labelledby="lobby-title">
             <div className="section-heading">

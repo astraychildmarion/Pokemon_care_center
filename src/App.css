@@ -51,21 +51,17 @@ a:focus-visible, button:focus-visible, select:focus-visible, main:focus-visible,
 .pokeball::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 24%; height: 24%; border: 3px solid #354b40; border-radius: 50%; background: #faf9ee; }
 .brand-mark { width: 36px; height: 36px; flex-shrink: 0; border-width: 2px; }
 .brand-mark::after { border-width: 2px; }
-.welcome { position: relative; isolation: isolate; overflow: hidden; margin-block: 36px 48px; padding: 48px; background: #e8eddf; border: 1px solid #dce3d2; border-radius: 28px; }
+.welcome { position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: center; min-height: 420px; margin-block: 36px 48px; padding: clamp(34px, 5vw, 64px); border: 1px solid #d8d8cc; border-radius: 28px; background-color: #d9d3c3; background-image: url('/assets/lobby.png'); background-position: center; background-size: cover; box-shadow: 0 16px 40px #26372e12; }
+.welcome::before { content: ""; position: absolute; inset: 0; z-index: -2; background: linear-gradient(102deg, rgb(217 130 54 / 32%) 0%, rgb(248 247 242 / 67%) 31%, rgb(248 247 242 / 42%) 65%, rgb(91 117 99 / 33%) 100%); }
+.welcome::after { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse 50% 78% at 24% 50%, rgb(248 247 242 / 88%) 0%, rgb(248 247 242 / 64%) 42%, transparent 76%); }
+.welcome-content { width: min(490px, 52%); text-shadow: 0 1px 12px rgb(248 247 242 / 80%); }
+.welcome .eyebrow { color: #31553e; }
 .eyebrow { font-size: 11px; font-weight: 750; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green); }
 .eyebrow span { margin-right: 6px; }
 h1 { font-size: clamp(32px, 4vw, 49px); line-height: 1.12; letter-spacing: -0.045em; margin-block: 18px; max-width: 620px; }
-.welcome-description { font-size: 14px; line-height: 1.8; color: #536550; }
-.lobby-link { display: inline-flex; align-items: center; gap: 30px; margin-top: 26px; padding: 13px 20px; background: var(--green); color: #fff; text-decoration: none; border-radius: 10px; font-size: 13px; font-weight: 650; }
-.lobby-link:hover { background: #294d38; }
-.welcome-art { position: absolute; right: 30px; top: 0; width: 360px; height: 100%; z-index: -1; display: grid; place-items: center; }
-.hero-ball { width: 150px; height: 150px; transform: rotate(-18deg); box-shadow: 14px 20px 0 #355e4610; }
-.orbit { position: absolute; width: 265px; height: 265px; border: 1px solid #355e4620; border-radius: 50%; }
-.orbit-two { width: 325px; height: 325px; border-style: dashed; }
-.hero-spark { position: absolute; color: #638064; font-size: 36px; }
-.spark-one { top: 65px; right: 60px; }
-.spark-two { bottom: 95px; left: 45px; font-size: 27px; }
-.art-caption { position: absolute; bottom: 40px; font-size: 11px; color: #536550; letter-spacing: 0.025em; }
+.welcome-description { max-width: 410px; font-size: 14px; line-height: 1.8; color: #3f5547; }
+.lobby-link { display: inline-flex; align-items: center; gap: 22px; margin-top: 26px; padding: 13px 20px; background: #355e46ed; color: #fff; text-decoration: none; text-shadow: none; border: 1px solid #284c37; border-radius: 10px; box-shadow: 0 8px 18px #26372e18; font-size: 13px; font-weight: 650; transition: background 150ms ease, transform 150ms ease, box-shadow 150ms ease; }
+.lobby-link:hover { background: #294d38; transform: translateY(-2px); box-shadow: 0 11px 22px #26372e24; }
 .section-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 h2 { margin-top: 8px; font-size: 28px; letter-spacing: -0.035em; }
 .preview-label { font-size: 11px; color: #53634a; background: #e8eddf; border: 1px solid #d9e1ce; border-radius: 30px; padding: 8px 13px; white-space: nowrap; }
@@ -249,8 +245,8 @@ h3 { font-size: 18px; letter-spacing: -0.02em; margin-block: 6px 13px; }
 
 @media (max-width: 1000px) {
   .pokemon-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .welcome { padding: 36px; }
-  .welcome-art { right: -65px; opacity: 0.65; }
+  .welcome { min-height: 390px; padding: 38px; background-position: 44% center; }
+  .welcome-content { width: min(450px, 60%); }
   .welcome-description { max-width: 360px; }
 }
 
@@ -261,8 +257,10 @@ h3 { font-size: 18px; letter-spacing: -0.02em; margin-block: 6px 13px; }
   .details-art img { height: 240px; }
   .page-width { width: calc(100% - 40px); }
   .pokemon-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-  .welcome { margin-block: 24px 32px; padding: 30px; }
-  .welcome-art { display: none; }
+  .welcome { align-items: flex-end; min-height: 500px; margin-block: 24px 32px; padding: 34px 30px; background-position: 62% center; }
+  .welcome::before { background: linear-gradient(155deg, rgb(217 130 54 / 22%) 0%, rgb(248 247 242 / 24%) 36%, rgb(248 247 242 / 76%) 70%, rgb(91 117 99 / 38%) 100%); }
+  .welcome::after { background: linear-gradient(to bottom, transparent 22%, rgb(248 247 242 / 32%) 48%, rgb(248 247 242 / 92%) 100%); }
+  .welcome-content { width: min(470px, 100%); }
   .project-label { display: none; }
   .site-footer { flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 36px; }
 }
@@ -278,7 +276,8 @@ h3 { font-size: 18px; letter-spacing: -0.02em; margin-block: 6px 13px; }
   .header-status, .lobby-care-wrapper { margin-left: 0; }
   .game-speed-control { grid-template-columns: 1fr; }
   .game-speed-control p { grid-column: 1; }
-  .welcome { padding: 25px 20px; border-radius: 20px; }
+  .welcome { min-height: 530px; padding: 28px 20px; border-radius: 20px; background-position: 66% center; }
+  .welcome h1 { font-size: clamp(31px, 10vw, 40px); }
   .desktop-break { display: none; }
   .section-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
   .pokemon-grid { grid-template-columns: 1fr; }
@@ -291,6 +290,8 @@ h3 { font-size: 18px; letter-spacing: -0.02em; margin-block: 6px 13px; }
   .pokemon-card.care-emergency { animation: none; }
   .lobby-care-content { animation: none; }
   .lobby-care-tooltip { transition: none; }
+  .lobby-link { transition: none; }
+  .lobby-link:hover { transform: none; }
   .care-action-button, .care-action-tooltip { transition: none; }
   .care-value-feedback,
   .card-art.reaction-feed .pokemon-artwork,
