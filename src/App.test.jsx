@@ -129,7 +129,7 @@ describe('Pokémon adoption lobby', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'Draw Pokémon' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Adopt Bulbasaur' }));
-    const cardButton = screen.getByRole('button', { name: 'Select bulbasaur' });
+    const cardButton = screen.getByRole('button', { name: 'See Bulbasaur status' });
 
     fireEvent.click(cardButton);
 
@@ -147,8 +147,8 @@ describe('Pokémon adoption lobby', () => {
     expect(screen.getByRole('meter', { name: 'bulbasaur health' })).toHaveAttribute('value', '100');
     expect(screen.getByRole('meter', { name: 'bulbasaur hunger' })).toHaveAttribute('value', '80');
     expect(screen.getByRole('meter', { name: 'bulbasaur happiness' })).toHaveAttribute('value', '80');
-    fireEvent.click(screen.getByRole('button', { name: 'Select bulbasaur' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Feed' }));
+    fireEvent.click(screen.getByRole('button', { name: 'See Bulbasaur status' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Feed Bulbasaur' }));
 
     expect(screen.getByRole('meter', { name: 'Hunger' })).toHaveAttribute('value', '100');
     expect(screen.getByRole('meter', { name: 'Happiness' })).toHaveAttribute('value', '85');
@@ -227,9 +227,9 @@ describe('Pokémon adoption lobby', () => {
     expect(screen.getByRole('status', { name: '1 Pokémon needs attention' }))
       .toHaveTextContent('Needs Attention');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Select bulbasaur' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Feed' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Play' }));
+    fireEvent.click(screen.getByRole('button', { name: 'See Bulbasaur status' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Feed Bulbasaur' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Play with Bulbasaur' }));
 
     expect(screen.getByRole('status', { name: 'All Pokémon are doing well' }))
       .toHaveTextContent('Doing Well');
@@ -242,8 +242,8 @@ describe('Pokémon adoption lobby', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'Draw Pokémon' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Adopt Bulbasaur' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Select bulbasaur' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Feed' }));
+    fireEvent.click(screen.getByRole('button', { name: 'See Bulbasaur status' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Feed Bulbasaur' }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Return Pokémon' }));
     fireEvent.click(screen.getByRole('button', { name: 'Return Bulbasaur' }));
@@ -265,8 +265,8 @@ describe('Pokémon adoption lobby', () => {
     const firstVisit = render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'Draw Pokémon' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Adopt Bulbasaur' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Select bulbasaur' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Feed' }));
+    fireEvent.click(screen.getByRole('button', { name: 'See Bulbasaur status' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Feed Bulbasaur' }));
     firstVisit.unmount();
     fetchPokemonDetails.mockClear();
 
@@ -321,5 +321,41 @@ describe('Pokémon adoption lobby', () => {
     expect(screen.getByRole('button', { name: 'Draw Pokémon' })).toBeDisabled();
     expect(screen.getByText("You've met every Pokémon available in this lobby."))
       .toHaveAttribute('role', 'status');
+  });
+
+  it('updates care meters from card actions without opening details', () => {
+    localStorage.setItem('pokemon-adoption-lobby', JSON.stringify({
+      pokemon: [bulbasaur],
+      petStates: { 1: { health: 50, hunger: 50, happiness: 50 } },
+      returnedPokemonIds: [],
+    }));
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Give Bulbasaur water' }));
+    expect(screen.getByRole('meter', { name: 'bulbasaur health' })).toHaveAttribute('value', '60');
+    expect(screen.getByRole('meter', { name: 'bulbasaur hunger' })).toHaveAttribute('value', '55');
+    expect(screen.getByText('+10')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Play with Bulbasaur' }));
+    expect(screen.getByRole('meter', { name: 'bulbasaur hunger' })).toHaveAttribute('value', '50');
+    expect(screen.getByRole('meter', { name: 'bulbasaur happiness' })).toHaveAttribute('value', '75');
+    fireEvent.click(screen.getByRole('button', { name: 'Feed Bulbasaur' }));
+    expect(screen.getByRole('meter', { name: 'bulbasaur hunger' })).toHaveAttribute('value', '75');
+    expect(screen.getByRole('meter', { name: 'bulbasaur happiness' })).toHaveAttribute('value', '80');
+    expect(screen.queryByRole('heading', { level: 1, name: 'bulbasaur' })).not.toBeInTheDocument();
+  });
+
+  it('improves card and global care status immediately after card recovery', () => {
+    localStorage.setItem('pokemon-adoption-lobby', JSON.stringify({
+      pokemon: [bulbasaur],
+      petStates: { 1: { health: 100, hunger: 50, happiness: 80 } },
+      returnedPokemonIds: [],
+    }));
+    render(<App />);
+    expect(screen.getByRole('status', { name: '1 Pokémon needs attention' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Feed Bulbasaur' }));
+
+    expect(screen.getByText('Doing well')).toBeInTheDocument();
+    expect(screen.getByRole('status', { name: 'All Pokémon are doing well' })).toBeInTheDocument();
   });
 });

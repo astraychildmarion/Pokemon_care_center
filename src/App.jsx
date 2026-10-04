@@ -42,12 +42,11 @@ export default function App() {
     setSelectedPokemon(guest);
   }
 
-  function interactWithPokemon(action) {
-    if (!selectedPokemon) return;
-    const id = selectedPokemon.id;
+  function interactWithPokemon(action, pokemonId = selectedPokemon?.id) {
+    if (!pokemonId) return;
     setPetStates((states) => ({
       ...states,
-      [id]: updatePetState(states[id] ?? INITIAL_PET_STATE, action),
+      [pokemonId]: updatePetState(states[pokemonId] ?? INITIAL_PET_STATE, action),
     }));
   }
 
@@ -233,6 +232,7 @@ export default function App() {
                     pokemon={guest}
                     pet={petStates[guest.id] ?? INITIAL_PET_STATE}
                     onSelect={selectPokemon}
+                    onInteract={(action) => interactWithPokemon(action, guest.id)}
                     onPermanentReturn={permanentlyReturnPokemon}
                   />
                 ))}

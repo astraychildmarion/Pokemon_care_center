@@ -84,6 +84,21 @@ describe('PokemonDetails', () => {
     expect(play.mock.instances[0]).toHaveAttribute('src', pokemon.cry);
   });
 
+  it('keeps all three icon care actions in the detail view', () => {
+    render(
+      <PokemonDetails
+        pokemon={bulbasaur}
+        pet={{ health: 80, hunger: 70, happiness: 60 }}
+        onBack={vi.fn()}
+        onInteract={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Feed Bulbasaur' })).toHaveTextContent('🍎Feed');
+    expect(screen.getByRole('button', { name: 'Give Bulbasaur water' })).toHaveTextContent('💧Water');
+    expect(screen.getByRole('button', { name: 'Play with Bulbasaur' })).toHaveTextContent('🎾Play');
+  });
+
   it.each([null, 'https://example.com/broken.png'])(
     'keeps details and Back available when artwork cannot display (%j)',
     (image) => {
@@ -124,9 +139,9 @@ describe('PokemonDetails', () => {
       />,
     );
 
-    expect(screen.queryByRole('button', { name: 'Feed' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Give Water' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Play' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Feed Bulbasaur' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Give Bulbasaur water' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Play with Bulbasaur' })).not.toBeInTheDocument();
     expect(screen.getByText('Bulbasaur can no longer stay in your lobby.')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Return Bulbasaur' }));
     expect(screen.getByText(/you will not be able to adopt Bulbasaur again/)).toBeInTheDocument();

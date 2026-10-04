@@ -4,8 +4,9 @@ A small React learning project evolving into a Pokémon care and adoption game.
 The lobby now draws one random Pokémon on request from a predefined set of valid
 PokéAPI IDs. A reveal asks the player to Adopt or Skip before the Pokémon can
 enter the lobby. Adopted Pokémon still use normalized, real PokéAPI data.
-Reusable cards support accessible selection and missing/broken artwork. Selecting
-a card opens the existing Pokémon detail view with Back navigation.
+Reusable cards support quick care, accessible status navigation, and
+missing/broken artwork. See status opens the existing Pokémon detail view with
+Back navigation.
 The detail view now includes a virtual pet care panel with Feed, Give Water,
 and Play interactions. Each Pokémon keeps its own pet values during the session.
 Milestone 7 confirmed that Context is unnecessary. Milestone 8 adds deliberate
@@ -48,8 +49,9 @@ npm run build
 - `src/main.jsx`: React entry point and Strict Mode.
 - `src/App.test.jsx`: draw, reveal, skip, adoption, capacity, error, and detail tests.
 - `src/components/PokemonReveal.jsx`: Adopt/Skip confirmation for a drawn Pokémon.
-- `src/components/PokemonCard.jsx`: card presentation, image fallback, and selection callback.
-- `src/components/PokemonCard.test.jsx`: supplied data, selection, and broken-artwork tests.
+- `src/components/PokemonCard.jsx`: card presentation, quick care, feedback, and status navigation.
+- `src/components/PokemonCard.test.jsx`: card care, accessibility, navigation, and fallback tests.
+- `src/components/CareActions.jsx`: shared icon care controls and explanatory tooltips.
 - `src/components/PokemonDetails.jsx`: details, care controls, Back navigation, and confirmed return UI.
 - `src/components/PokemonDetails.test.jsx`: detail content, navigation, return confirmation, and fallbacks.
 - `src/components/PokemonCry.jsx`: deliberate audio playback, status messages, and cleanup.
@@ -126,8 +128,12 @@ numbers for all three values. The lowest value determines the state: 70–100 is
 One or two zero values remain recoverable emergencies. Specific text such as
 "Needs food" or "Needs attention" accompanies warning styling, and recovering
 every metric to 70 removes it.
-The detail panel also retains its focused low-hunger message. Care buttons show
-their effects, support keyboard activation, and retain visible focus.
+Each active card provides compact Feed, Water, and Play icon controls beside the
+meters. Their visible labels and Pokémon-specific accessible names keep them
+clear, while hover and keyboard-focus tooltips explain effects. Card actions
+update the shared state immediately, briefly show actual value changes beside
+affected meters, and trigger a subtle artwork reaction. The detail panel uses
+the same controls at a larger size and retains its focused low-hunger message.
 
 `App` owns `petStates`, keyed by Pokémon ID, and uses functional state updates
 with the pure `updatePetState` helper. `PetCare` receives values and an interaction
@@ -225,11 +231,12 @@ engine.
 
 ## Pokémon cards
 
-`PokemonCard` takes `pokemon`, `pet`, `onSelect`, and optional `isSelected` props. It
-renders a list item with artwork, Pokédex number, name, types, and a native
-selection button. The button calls `onSelect(pokemon)`; its visible label includes
-the Pokémon name, and native button behavior supports Enter and Space. Focus
-styles and a text label identify the active selection without relying on colour.
+`PokemonCard` takes `pokemon`, `pet`, `onSelect`, `onInteract`, and optional
+`isSelected` props. It renders a list item with artwork, Pokédex number, name,
+types, meters, quick-care actions, and a secondary See status button. Care
+actions call `onInteract(action)` without opening details. See status calls
+`onSelect(pokemon)` and supports native keyboard behavior. Focus styles and text
+labels identify every action without relying on icons or colour.
 
 The card does not fetch API data or own the selected Pokémon. Its only local
 state records a failed artwork URL, allowing a visible fallback while keeping

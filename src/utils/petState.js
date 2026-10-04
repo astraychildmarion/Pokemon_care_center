@@ -1,5 +1,29 @@
 export const INITIAL_PET_STATE = { health: 100, hunger: 80, happiness: 80 };
 
+export const CARE_ACTIONS = {
+  feed: {
+    icon: '🍎',
+    label: 'Feed',
+    effects: { hunger: 25, happiness: 5 },
+  },
+  water: {
+    icon: '💧',
+    label: 'Water',
+    effects: { health: 10, hunger: 5 },
+  },
+  play: {
+    icon: '🎾',
+    label: 'Play',
+    effects: { happiness: 25, hunger: -5 },
+  },
+};
+
+export const CARE_METRIC_LABELS = {
+  health: 'Health',
+  hunger: 'Hunger',
+  happiness: 'Happiness',
+};
+
 function clamp(value) {
   return Math.max(0, Math.min(100, value));
 }
@@ -10,28 +34,13 @@ export function isReturnRequired(pet) {
 
 export function updatePetState(pet, action) {
   if (isReturnRequired(pet)) return pet;
-  switch (action) {
-    case 'feed':
-      return {
-        ...pet,
-        hunger: clamp(pet.hunger + 25),
-        happiness: clamp(pet.happiness + 5),
-      };
-    case 'water':
-      return {
-        ...pet,
-        health: clamp(pet.health + 10),
-        hunger: clamp(pet.hunger + 5),
-      };
-    case 'play':
-      return {
-        ...pet,
-        happiness: clamp(pet.happiness + 25),
-        hunger: clamp(pet.hunger - 5),
-      };
-    default:
-      return pet;
-  }
+  const careAction = CARE_ACTIONS[action];
+  if (!careAction) return pet;
+
+  return Object.entries(careAction.effects).reduce((nextPet, [metric, amount]) => ({
+    ...nextPet,
+    [metric]: clamp(nextPet[metric] + amount),
+  }), pet);
 }
 
 export function getCareLevel(pet) {

@@ -1,4 +1,6 @@
-export default function PetCare({ pet, onInteract }) {
+import CareActions from './CareActions';
+
+export default function PetCare({ pet, pokemonName = 'your Pokémon', onInteract }) {
   return (
     <section className="pet-care" aria-labelledby="pet-care-title">
       <h2 id="pet-care-title">Care for your Pokémon</h2>
@@ -16,20 +18,7 @@ export default function PetCare({ pet, onInteract }) {
         ))}
       </div>
       {pet.hunger < 30 && <p className="hunger-warning" role="status">Needs food — a snack would help.</p>}
-      <div className="care-actions">
-        <div>
-          <button className="lobby-button" type="button" onClick={() => onInteract('feed')}>Feed</button>
-          <p>Hunger +25 · Happiness +5</p>
-        </div>
-        <div>
-          <button className="lobby-button" type="button" onClick={() => onInteract('water')}>Give Water</button>
-          <p>Health +10 · Hunger +5</p>
-        </div>
-        <div>
-          <button className="lobby-button" type="button" onClick={() => onInteract('play')}>Play</button>
-          <p>Happiness +25 · Hunger −5</p>
-        </div>
-      </div>
+      <CareActions pokemonName={pokemonName} onInteract={onInteract} size="large" />
     </section>
   );
 }

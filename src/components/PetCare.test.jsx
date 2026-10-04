@@ -6,7 +6,7 @@ const pet = { health: 80, hunger: 70, happiness: 60 };
 
 describe('PetCare', () => {
   it('shows labeled meters and readable values for all three pet indicators', () => {
-    render(<PetCare pet={pet} onInteract={vi.fn()} />);
+    render(<PetCare pet={pet} pokemonName="Bulbasaur" onInteract={vi.fn()} />);
 
     expect(screen.getByRole('meter', { name: 'Health' })).toHaveAttribute('value', '80');
     expect(screen.getByRole('meter', { name: 'Hunger' })).toHaveAttribute('value', '70');
@@ -19,11 +19,15 @@ describe('PetCare', () => {
     expect(screen.getByText('Happiness +25 · Hunger −5')).toBeInTheDocument();
   });
 
-  it.each([['Feed', 'feed'], ['Give Water', 'water'], ['Play', 'play']])(
+  it.each([
+    ['Feed Bulbasaur', 'feed'],
+    ['Give Bulbasaur water', 'water'],
+    ['Play with Bulbasaur', 'play'],
+  ])(
     'sends the action to its parent when %s is activated',
     (label, action) => {
       const onInteract = vi.fn();
-      render(<PetCare pet={pet} onInteract={onInteract} />);
+      render(<PetCare pet={pet} pokemonName="Bulbasaur" onInteract={onInteract} />);
 
       fireEvent.click(screen.getByRole('button', { name: label }));
 
@@ -33,11 +37,13 @@ describe('PetCare', () => {
 
   it('shows Needs food below 30 and removes it when hunger recovers', () => {
     const onInteract = vi.fn();
-    const { rerender } = render(<PetCare pet={{ ...pet, hunger: 29 }} onInteract={onInteract} />);
+    const { rerender } = render(
+      <PetCare pet={{ ...pet, hunger: 29 }} pokemonName="Bulbasaur" onInteract={onInteract} />,
+    );
 
     expect(screen.getByRole('status')).toHaveTextContent('Needs food');
 
-    rerender(<PetCare pet={{ ...pet, hunger: 30 }} onInteract={onInteract} />);
+    rerender(<PetCare pet={{ ...pet, hunger: 30 }} pokemonName="Bulbasaur" onInteract={onInteract} />);
 
     expect(screen.queryByText(/Needs food/)).not.toBeInTheDocument();
   });

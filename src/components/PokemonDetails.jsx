@@ -73,7 +73,9 @@ export default function PokemonDetails({
       {onRandomEvent && !returnRequired && (
         <RandomPetEvent pokemonName={pokemon.name} onEvent={onRandomEvent} />
       )}
-      {pet && !returnRequired && <PetCare pet={pet} onInteract={onInteract} />}
+      {pet && !returnRequired && (
+        <PetCare pet={pet} pokemonName={formattedName} onInteract={onInteract} />
+      )}
       <div className="details-stats">
         <h2 id="stats-title">Base stats</h2>
         <p className="stats-description">A quick look at this Pokémon’s strengths.</p>

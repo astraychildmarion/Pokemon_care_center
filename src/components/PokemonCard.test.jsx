@@ -25,7 +25,7 @@ describe('PokemonCard', () => {
     const onSelect = vi.fn();
     render(<ul><PokemonCard pokemon={bulbasaur} onSelect={onSelect} /></ul>);
 
-    const button = screen.getByRole('button', { name: 'Select bulbasaur' });
+    const button = screen.getByRole('button', { name: 'See Bulbasaur status' });
     button.focus();
     expect(button).toHaveFocus();
     fireEvent.click(button);
@@ -47,7 +47,7 @@ describe('PokemonCard', () => {
 
     expect(screen.getByText('Artwork unavailable')).toBeInTheDocument();
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Select bulbasaur' }));
+    fireEvent.click(screen.getByRole('button', { name: 'See Bulbasaur status' }));
     expect(onSelect).toHaveBeenCalledWith(bulbasaur);
 
     const newImage = { ...bulbasaur, image: 'https://example.com/new-artwork.png' };
@@ -113,6 +113,41 @@ describe('PokemonCard', () => {
     expect(screen.getByText('Needs food')).toBeInTheDocument();
   });
 
+  it('provides accessible quick-care actions with explanatory tooltips', () => {
+    const onInteract = vi.fn();
+    const onSelect = vi.fn();
+    render(
+      <ul>
+        <PokemonCard
+          pokemon={bulbasaur}
+          pet={healthyPet}
+          onSelect={onSelect}
+          onInteract={onInteract}
+        />
+      </ul>,
+    );
+
+    const feed = screen.getByRole('button', { name: 'Feed Bulbasaur' });
+    const water = screen.getByRole('button', { name: 'Give Bulbasaur water' });
+    const play = screen.getByRole('button', { name: 'Play with Bulbasaur' });
+    expect(feed).toHaveTextContent('🍎Feed');
+    expect(water).toHaveTextContent('💧Water');
+    expect(play).toHaveTextContent('🎾Play');
+    const feedTooltip = screen.getByRole('tooltip', {
+      name: /Feed Bulbasaur.*Hunger \+25.*Happiness \+5/,
+    });
+    feed.focus();
+    expect(feed).toHaveFocus();
+    expect(feed).toHaveAttribute('aria-describedby', feedTooltip.id);
+
+    fireEvent.click(feed);
+    fireEvent.click(water);
+    fireEvent.click(play);
+
+    expect(onInteract.mock.calls).toEqual([['feed'], ['water'], ['play']]);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it('shows an inactive Return Required card and confirms permanent return', () => {
     const onPermanentReturn = vi.fn();
     render(
@@ -128,7 +163,10 @@ describe('PokemonCard', () => {
 
     expect(screen.getByText('Return Required')).toBeInTheDocument();
     expect(screen.getByText('Bulbasaur can no longer stay in the lobby.')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Select bulbasaur' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'See Bulbasaur status' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Feed Bulbasaur' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Give Bulbasaur water' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Play with Bulbasaur' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Return Bulbasaur' }));
     expect(screen.getByRole('heading', { name: 'Return Bulbasaur?' })).toBeInTheDocument();
     expect(screen.getByText(/Once returned, you will not be able to adopt Bulbasaur again/))
