@@ -148,7 +148,7 @@ describe('PokemonCard', () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it('shows an inactive Return Required card and confirms permanent return', () => {
+  it('shows an inactive Return Required card and returns it immediately', () => {
     const onPermanentReturn = vi.fn();
     render(
       <ul>
@@ -168,13 +168,6 @@ describe('PokemonCard', () => {
     expect(screen.queryByRole('button', { name: 'Give Bulbasaur water' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Play with Bulbasaur' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Return Bulbasaur' }));
-    expect(screen.getByRole('heading', { name: 'Return Bulbasaur?' })).toBeInTheDocument();
-    expect(screen.getByText(/Once returned, you will not be able to adopt Bulbasaur again/))
-      .toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-    expect(onPermanentReturn).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Return Bulbasaur' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm return Bulbasaur' }));
 
     expect(onPermanentReturn).toHaveBeenCalledExactlyOnceWith(bulbasaur);
   });

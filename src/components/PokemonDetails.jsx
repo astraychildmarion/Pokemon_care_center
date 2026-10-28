@@ -37,7 +37,7 @@ export default function PokemonDetails({
   return (
     <section className="pokemon-details" aria-labelledby="pokemon-detail-title">
       <button className="back-button" type="button" onClick={onBack}>
-        <span aria-hidden="true">←</span> Back to lobby
+        <span aria-hidden="true">←</span> Back to home
       </button>
       <div className="details-grid">
         <div className="details-art">

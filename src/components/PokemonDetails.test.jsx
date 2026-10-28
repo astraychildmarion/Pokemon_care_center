@@ -43,11 +43,11 @@ describe('PokemonDetails', () => {
     expect(within(stats).getByText('65')).toBeInTheDocument();
   });
 
-  it('calls the parent when Back to lobby is activated', () => {
+  it('calls the parent when Back to home is activated', () => {
     const onBack = vi.fn();
     render(<PokemonDetails pokemon={bulbasaur} onBack={onBack} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Back to lobby' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Back to home' }));
 
     expect(onBack).toHaveBeenCalledOnce();
   });
@@ -108,7 +108,7 @@ describe('PokemonDetails', () => {
       expect(screen.getByText('Artwork unavailable')).toBeInTheDocument();
       expect(screen.queryByRole('img')).not.toBeInTheDocument();
       expect(screen.getByText('0.7 m')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Back to lobby' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Back to home' })).toBeEnabled();
     },
   );
 

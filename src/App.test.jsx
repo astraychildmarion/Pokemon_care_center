@@ -134,7 +134,7 @@ describe('Pokémon adoption lobby', () => {
     fireEvent.click(cardButton);
 
     expect(screen.getByRole('heading', { level: 1, name: 'bulbasaur' })).toHaveFocus();
-    fireEvent.click(screen.getByRole('button', { name: 'Back to lobby' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Back to home' }));
     expect(cardButton).toHaveFocus();
   });
 
@@ -152,7 +152,7 @@ describe('Pokémon adoption lobby', () => {
 
     expect(screen.getByRole('meter', { name: 'Hunger' })).toHaveAttribute('value', '100');
     expect(screen.getByRole('meter', { name: 'Happiness' })).toHaveAttribute('value', '85');
-    fireEvent.click(screen.getByRole('button', { name: 'Back to lobby' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Back to home' }));
     expect(screen.getByRole('meter', { name: 'bulbasaur hunger' })).toHaveAttribute('value', '100');
     expect(screen.getByRole('meter', { name: 'bulbasaur happiness' })).toHaveAttribute('value', '85');
   });
@@ -294,7 +294,6 @@ describe('Pokémon adoption lobby', () => {
       .toHaveTextContent('Return Required');
     expect(screen.getByText('1 / 10 Pokémon')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Return Bulbasaur' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm return Bulbasaur' }));
 
     expect(screen.getByText('0 / 10 Pokémon')).toBeInTheDocument();
     expect(JSON.parse(localStorage.getItem('pokemon-adoption-lobby')).returnedPokemonIds)
